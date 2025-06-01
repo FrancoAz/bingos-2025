@@ -22,13 +22,12 @@ const modal = document.getElementById('confirmationModal');
 const closeModalBtn = document.querySelector('.close-modal');
 const closeBtn = document.querySelector('.close-btn');
 const reservedNumberSpan = document.getElementById('reservedNumber');
+const viewNumbersBtns = document.querySelectorAll('.view-numbers-btn');
 
 // State Management
 let selectedNumbers = {
     1: null,
-    2: null,
-    3: null,
-    4: null
+    2: null
 };
 
 // Tab Switching
@@ -64,6 +63,22 @@ function generateBingoGrid(gridElement, bingoId) {
 
 // Load occupied numbers from Firestore
 function loadOccupiedNumbers(gridElement, bingoId) {
+    // Predefined occupied numbers for Bingo 1
+    const predefinedOccupiedNumbers = {
+        1: [1, 2, 3, 4, 6, 8, 20, 26, 27, 30, 33, 40, 50, 69, 77, 79, 80]
+    };
+    
+    // Mark predefined numbers as occupied for this bingo
+    if (predefinedOccupiedNumbers[bingoId]) {
+        predefinedOccupiedNumbers[bingoId].forEach(num => {
+            const numberButton = gridElement.querySelector(`[data-number="${num}"]`);
+            if (numberButton) {
+                numberButton.classList.add('occupied');
+                numberButton.style.backgroundColor = 'red'; // Set color to red instead of default gray
+            }
+        });
+    }
+    
     db.collection(`bingo${bingoId}`)
         .get()
         .then((querySnapshot) => {
@@ -119,53 +134,29 @@ document.querySelectorAll('form').forEach(form => {
 });
 
 function handleFormSubmit(event) {
-    event.preventDefault();
-    
+    // Form now submits to FormSubmit service
     const form = event.target;
     const bingoId = form.id.replace('Form', '');
     const number = selectedNumbers[bingoId.slice(-1)];
     
     if (!number) {
         alert('Por favor, selecciona un número para participar.');
+        event.preventDefault();
         return;
     }
     
-    const formData = {
-        name: form.querySelector('[name="name"]').value,
-        email: form.querySelector('[name="email"]').value,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    // Add selected number to form submission
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'numero_seleccionado';
+    hiddenInput.value = number;
+    form.appendChild(hiddenInput);
     
-    // Save to Firestore
-    db.collection(bingoId)
-        .doc(number)
-        .set(formData)
-        .then(() => {
-            // Mark number as occupied
-            const numberButton = document.querySelector(`#${bingoId} .bingo-grid .bingo-number[data-number="${number}"]`);
-            numberButton.classList.add('occupied');
-            numberButton.classList.remove('selected');
-            
-            // Reset form
-            form.reset();
-            
-            // Update selected number display
-            document.querySelector(`#${bingoId} .selected-number`).textContent = 'Ninguno';
-            
-            // Disable submit button
-            form.querySelector('.submit-btn').disabled = true;
-            
-            // Clear selected number state
-            selectedNumbers[bingoId.slice(-1)] = null;
-            
-            // Show confirmation modal
-            reservedNumberSpan.textContent = number;
-            modal.classList.add('show');
-        })
-        .catch((error) => {
-            console.error("Error saving reservation: ", error);
-            alert('Hubo un error al reservar el número. Por favor, intenta nuevamente.');
-        });
+    // Show confirmation modal after small delay to allow form submission
+    setTimeout(() => {
+        reservedNumberSpan.textContent = number;
+        modal.classList.add('show');
+    }, 500);
 }
 
 // Update Countdowns
@@ -231,3 +222,32 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// View occupied numbers functionality
+viewNumbersBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const bingoId = btn.getAttribute('data-bingo');
+        const bingoGrid = document.querySelector(`.bingo-grid[data-bingo="${bingoId}"]`);
+        
+        // Scroll to bingo grid
+        bingoGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Highlight occupied numbers with animation
+        const occupiedNumbers = bingoGrid.querySelectorAll('.bingo-number.occupied');
+        occupiedNumbers.forEach(num => {
+            num.style.animation = 'pulse 1s';
+            setTimeout(() => {
+                num.style.animation = '';
+            }, 1000);
+        });
+    });
+});
+
+// Add pulse animation
+const style = document.createElement('style');
+style.textContent = `
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+    100% { transform: scale(1); }
+}`;
+document.head.appendChild(style);

@@ -232,6 +232,13 @@ header .subtitle {
     margin-top: 1rem;
 }
 
+.online-notice {
+    font-size: 1rem;
+    color: var(--accent-color);
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
 /* Countdown */
 .countdown {
     display: flex;
@@ -298,10 +305,9 @@ header .subtitle {
     cursor: not-allowed;
 }
 
-.bingo-number.selected {
-    background-color: var(--primary-color);
-    transform: scale(1.05);
-    box-shadow: 0 0 0 3px var(--primary-dark);
+.bingo-number.occupied[style*="background-color: red"] {
+    color: white;
+    font-weight: bold;
 }
 
 /* Bingo Form */
@@ -340,6 +346,23 @@ header .subtitle {
     border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 1rem;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.view-numbers-btn {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    background-color: var(--primary-color);
+}
+
+.view-numbers-btn:hover {
+    background-color: var(--primary-dark);
 }
 
 .payment-info {
@@ -660,4 +683,3 @@ footer {
         font-size: 1.2rem;
     }
 }
-
