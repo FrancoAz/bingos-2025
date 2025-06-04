@@ -65,7 +65,7 @@ function generateBingoGrid(gridElement, bingoId) {
 function loadOccupiedNumbers(gridElement, bingoId) {
     // Predefined occupied numbers for Bingo 1
     const predefinedOccupiedNumbers = {
-        1: [2, 3, 4, 6, 7, 8, 17, 20, 22,26, 27, 30, 33, 40, 50, 66, 69, 77, 79, 80]
+        1: [2, 3, 4, 6, 7, 8, 17, 20, 22, 26, 27, 30, 33, 40, 50, 69, 77, 79, 80]
     };
     
     // Mark predefined numbers as occupied for this bingo
